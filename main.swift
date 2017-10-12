@@ -62,7 +62,7 @@ struct vendingMachine {
                 if element.price < RaisedPrice {
                     element.price = RaisedPrice
                 } else {
-                    NSLog("올리려는 금액보다 제품의 가격이 더 높거나 같습니다. 가격을 올릴 수 없습니다")
+                    NSLog("error: 올리려는 금액보다 제품의 가격이 더 높거나 같습니다. 가격을 올릴 수 없습니다")
                 }
             }
         }
@@ -73,14 +73,22 @@ struct vendingMachine {
                 if element.amount < raisedAmount {
                     element.amount = raisedAmount
                 } else {
-                    NSLog("늘리려는 제품 수량보다 현재 제품의 수량이 더 많거나 같습니다. 재고를 늘릴 수 없습니다")
+                    NSLog("error: 늘리려는 제품 수량보다 현재 제품의 수량이 더 많거나 같습니다. 재고를 늘릴 수 없습니다")
                 }
             }
         }
     }
     mutating func register(registerType: String, registerBrand: String, registerWeight: Int, registerPrice: Int, registerName: String, registerDate: String, registerAmount: Int){
+        var nameCheck = true
         if registerAmount is Int && registerPrice is Int && registerWeight is Int {
-        switch registerType {
+            for (element) in items {
+                if element.name == registerName {
+                    nameCheck = false
+                    print("error: 상품의 이름은 같을 수 없습니다. 다른 상품 이름으로 다시 시도하세요.")
+                }
+            }
+            if nameCheck {
+            switch registerType {
         case "drink":
             let registerProcess = vendingMachine.drink(brand: registerBrand, weight: registerWeight, price: registerPrice, name: registerName, productDate: registerDate, amount: registerAmount)
             self.push(registerProcess)
@@ -105,6 +113,7 @@ struct vendingMachine {
         default:
             NSLog("error: %s는 정확하지 않은 종류입니다. drink, bread, gum, snack, chocolate 중 입력해주세요", registerType)
         }
+            }
         } else {
             print("error: 수량, 가격, 무게는 숫자로만 입력하셔야 합니다.")
         }
@@ -120,11 +129,16 @@ struct vendingMachine {
         for (element) in items {
             if element.name == findName {
                 if element.price <= money {
+                    if element.amount > 0{
                     money = money - element.price
                     buyList.append(element.name)
                     element.amount = element.amount - 1
+                    } else {
+                        print("error: 수량이 0개라서 구매할 수 없습니다.")
+                        }
+                    
                 } else {
-                    NSLog("돈이 부족해서 구매할 수 없습니다")
+                    NSLog("error: 돈이 부족해서 구매할 수 없습니다.")
                 }
             }
         }
@@ -145,6 +159,16 @@ struct vendingMachine {
     }
     mutating func insertCoin(coin: Int) {
         self.money = self.money + coin
+    }
+    func buyfindProduct<T: Equatable>(of nameFind: T, in array:[T]){
+        for (element) in array {
+            if element == nameFind {
+                print("구매한 상품입니다.")
+            } else {
+                print("구매하지 않은 상품입니다.")
+            }
+            
+        }
     }
 }
 
@@ -244,7 +268,7 @@ default: print("옵션을 확인해주세요")
     }
 case "2"?:
     while(check3){
-        print("사용자 메뉴를 선택해주세요: 1-구매 가능 목록 출력, 2-구매, 3-현재 금액 확인, 4-상품 목록 출력, 5-구매 목록 출력, 6-동전 넣기, 7-상위 메뉴로 나가기")
+        print("사용자 메뉴를 선택해주세요: 1-구매 가능 목록 출력, 2-구매, 3-현재 금액 확인, 4-상품 목록 출력, 5-구매 목록 출력, 6-동전 넣기, 7-구매 확인, 8-상위 메뉴로 나가기")
         let c = readLine()
         switch c {
         case "1"?:
@@ -275,6 +299,11 @@ case "2"?:
             }
             break
         case "7"?:
+            print("구매한지 궁금한 상품 이름을 입력하세요: ")
+            let buyName = readLine()
+            vendingMachine1.buyfindProduct(of: buyName!, in: vendingMachine1.buyList)
+            break
+        case "8"?:
             check3 = false
             break
             
